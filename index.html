@@ -1,7 +1,53 @@
 <!DOCTYPE html>
 <html>
-    <head>
-    </head>
-    <body>
-    </body>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>lyricGuessr</title>
+    <link href="styles.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="bulma/css/bulma.css" type="text/css"/>
+</head>
+<!-- TODO: Can't choose? Get a random pop song. / Stats page-->
+<body class="has-background-success-light">
+    <section class="hero is-small- is-dark">
+        <div class="hero-body">
+            <div>
+                <p class="title">lyricGuessr</p>
+                <p class="subtitle">Are you really a fan?</p>
+            </div>
+        </div>
+    </section>
+    <section class="section is-small">
+        <div class="block">
+            <h1 class="title">Pick from one of your favorite artists.</h1>
+            <h2 class="subtitle">You should <strong>really</strong> know this.</h2>
+        </div>
+        <div class="block">
+            <input id="artistInput" class="input is-rounded" type="text" placeholder="Isaiah Rashad">
+        </div>
+    </section>
+    <section class="section is-small">
+        <div class="block">
+            <h2 class="subtitle">Prove you're not just a <strong>bandwagon</strong> by guessing the song with the following lyrics...</h2>
+        </div>
+        <div class="block">
+            <div class="box has-text-centered">Meal ticket, ticket. Meal ticket, ticket comma huh.</div>
+        </div>
+    </section>
+    <section class="section is-small">
+        <div class="block">
+            <h2 class="subtitle">Enter your measly guess <strong>here.</strong></h2>
+            <input class="input is-rounded" type="text" placeholder="Free Lunch">
+        </div>
+        <div class="block"></div>
+    </section>
+    <footer class="footer has-background-grey-dark has-text-success-light">
+        <div class="content has-text-centered">
+          <p>
+            lyricGuessr by Jean-Claude Bissou.
+          </p>
+        </div>
+    </footer>
+</body>
+<script src="script.js"></script>
 </html>
