@@ -145,22 +145,22 @@ artistInput.addEventListener("change", async () => {
             track_album: "Views",
         }};
         console.log(randTrack);
+        displayLyrics(trackLyrics);
     }else{
         //function to get artist albums using ID
-    let artistAlbums = await getAlbums(apikey, artistID);
-    console.log(artistAlbums);
+        let artistAlbums = await getAlbums(apikey, artistID);
+        console.log(artistAlbums);
 
-    //function to get a track from album
-    let artistTrack = await getTrack(apikey, artistAlbums);
-    console.log(artistTrack);
+        //function to get a track from album
+        let artistTrack = await getTrack(apikey, artistAlbums);
+        console.log(artistTrack);
 
-    //function to get lyrics from track
-    let trackLyrics = await getLyrics(apikey, artistTrack);
-    console.log(trackLyrics);
-
+        //function to get lyrics from track
+        let trackLyrics = await getLyrics(apikey, artistTrack);
+        console.log(trackLyrics);
+        displayLyrics(trackLyrics);
     }
     //function to put lyrics in box
-    displayLyrics(trackLyrics);
 
     console.log(guessAnswer);
 });
