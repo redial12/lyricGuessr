@@ -37,14 +37,20 @@
     <section class="section is-small">
         <div class="block">
             <h2 class="subtitle">Enter your measly guess <strong>here.</strong></h2>
-            <input class="input is-rounded" type="text" placeholder="Free Lunch">
+            <input id="guessInput" class="input is-rounded" type="text" placeholder="Free Lunch">
         </div>
         <div class="block"></div>
+    </section>
+    <section id="answerSection" class="section is-small hidden">
+        <div class="block">
+            <h1 id="correctness"class="title has-text-centered"></h1>
+            <div id="answerBox" class="box has-text-centered"></div>
+        </div>
     </section>
     <footer class="footer has-background-grey-dark has-text-success-light">
         <div class="content has-text-centered">
           <p>
-            lyricGuessr by Jean-Claude Bissou.
+            lyricGuessr by Jean-Claude Bissou and Seyaul Kim.
           </p>
         </div>
     </footer>
