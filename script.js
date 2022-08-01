@@ -1,5 +1,6 @@
 //musixmatch api key
-let apikey = "84f4ec2655a2263d350ed92946c2cdeb";
+const apikey = "251585f21f0dcde77139880f7198a2ea";
+
 
 //first input for an artist
 const artistInput = document.querySelector("#artistInput");
@@ -7,10 +8,27 @@ const artistInput = document.querySelector("#artistInput");
 //selector for lyrics box
 const lyricsBox = document.querySelector("#lyricsBox");
 
+//guess input
+const guessInput = document.querySelector("#guessInput");
+
+//correct answer info
+const answerBox = document.querySelector("#answerBox");
+
+//display incorrect or correct
+const correctness = document.querySelector("#correctness");
+
+const answerSection = document.querySelector("#answerSection");
+
+let guessAnswer = "";
+
+let randTrack;
+
 async function getArtistID(apikey, artist){
     //query for artist search (temporary solution using proxy)
     const myQuery = `https://cors-anywhere.herokuapp.com/https://api.musixmatch.com/ws/1.1/artist.search?apikey=${apikey}&q_artist=${artist}
     `;
+    // const myQuery = `https://api.musixmatch.com/ws/1.1/artist.search?apikey=${apikey}&q_artist=${artist}
+    // `;
     const response = await fetch(myQuery, {
         mode: 'cors',
         header: {'Access-Control-Allow-Origin': "http://127.0.0.1:5500",
@@ -18,10 +36,10 @@ async function getArtistID(apikey, artist){
     });
 
     if(!response.ok){
-       throw new Error(`Error! status: ${response.status}`);
+        return -1;
     }
 
-    console.log(response);
+    // console.log(response);
     const data = await response.json();
     console.log(data);
     const artistID = data.message.body.artist_list[0].artist.artist_id;
@@ -38,7 +56,7 @@ async function getAlbums(apikey, artistID){
     if(!response.ok){
         throw new Error(`Error! status: ${response.status}`);
      }
-    console.log(response)
+    // console.log(response)
     const data = await response.json();
     console.log(data);
     data.message.body.album_list.forEach(element => {
@@ -60,12 +78,13 @@ async function getTrack(apikey, artistAlbums){
     if(!response.ok){
         throw new Error(`Error! status: ${response.status}`);
      }
-    console.log(response)
+    // console.log(response)
     const data = await response.json();
     console.log(data);
     //get trackList array and pick a random track
     const trackList = data.message.body.track_list;
-    const randTrack = trackList[Math.floor(Math.random()*trackList.length)];
+    randTrack = trackList[Math.floor(Math.random()*trackList.length)];
+    guessAnswer = randTrack.track.track_name;
     return randTrack;
 }
 
@@ -77,7 +96,7 @@ async function getLyrics(apikey, artistTrack){
     if(!response.ok){
         throw new Error(`Error! status: ${response.status}`);
      }
-    console.log(response)
+    // console.log(response)
     const data = await response.json();
     console.log(data);
 
@@ -111,6 +130,20 @@ function displayLyrics(trackLyrics){
     //this function needs to cut down the lyrics to a randomized section
 }
 
+function guessChecker(guess){
+    answerSection.classList.remove("hidden");
+    if(guess == guessAnswer.toLowerCase()){
+        console.log("Correct!");
+        correctness.innerText = "Correct!"
+    }else{
+        console.log("Incorrect.");
+        correctness.innerText = "Incorrect!"
+    }
+    answerBox.innerHTML = `
+    <h1 class="subtitle">
+    The song name was ${guessAnswer}!
+    </h1>`;
+}
 
 artistInput.addEventListener("change", async () => {
     let artist = artistInput.value;
@@ -122,18 +155,39 @@ artistInput.addEventListener("change", async () => {
     const artistID = await getArtistID(apikey, artist);
     console.log(artistID);
 
-    //function to get artist albums using ID
-    let artistAlbums = await getAlbums(apikey, artistID);
-    console.log(artistAlbums);
+    if(artistID == -1){
+        trackLyrics = `You used to call me on my cell phone
+        Late night when you need my love
+        Call me on my cell phone`;
+        console.log(trackLyrics);
+        guessAnswer = "Hotline Bling";
+        randTrack = {track: {
+            track_name: guessAnswer,
+            track_album: "Views",
+        }};
+        console.log(randTrack);
+        displayLyrics(trackLyrics);
+    }else{
+        //function to get artist albums using ID
+        let artistAlbums = await getAlbums(apikey, artistID);
+        console.log(artistAlbums);
 
-    //function to get a track from album
-    let artistTrack = await getTrack(apikey, artistAlbums);
-    console.log(artistTrack);
+        //function to get a track from album
+        let artistTrack = await getTrack(apikey, artistAlbums);
+        console.log(artistTrack);
 
-    //function to get lyrics from track
-    let trackLyrics = await getLyrics(apikey, artistTrack);
-    console.log(trackLyrics);
-
+        //function to get lyrics from track
+        let trackLyrics = await getLyrics(apikey, artistTrack);
+        console.log(trackLyrics);
+        displayLyrics(trackLyrics);
+    }
     //function to put lyrics in box
-    displayLyrics(trackLyrics);
+
+    console.log(guessAnswer);
 });
+
+guessInput.addEventListener("change", async ()=> {
+    let guess = guessInput.value.toLowerCase();
+    console.log(guess);
+    guessChecker(guess);
+})
