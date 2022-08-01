@@ -1,6 +1,7 @@
 //musixmatch api key
 const apikey = "251585f21f0dcde77139880f7198a2ea";
 
+
 //first input for an artist
 const artistInput = document.querySelector("#artistInput");
 
@@ -49,7 +50,8 @@ async function getAlbums(apikey, artistID){
     //array to store album IDs
     let arrAlbums = [];
     //query to get albums using artist IDs
-    const myQuery = `https://cors-anywhere.herokuapp.com/https://api.musixmatch.com/ws/1.1/artist.albums.get?apikey=${apikey}&artist_id=${artistID}&page_size=3`;
+    const myQuery = `https://cors-anywhere.herokuapp.com/https://api.musixmatch.com/ws/1.1/artist.albums.get?apikey=${apikey}&artist_id=${artistID}&page_size=4`;
+    console.log(myQuery);
     const response = await fetch(myQuery);
     if(!response.ok){
         throw new Error(`Error! status: ${response.status}`);
@@ -104,8 +106,27 @@ async function getLyrics(apikey, artistTrack){
     return trackLyrics;
 }
 
+
+
 function displayLyrics(trackLyrics){
-    lyricsBox.innerText = trackLyrics;
+    // trackLyrics = "Ayy, can you come to Henry's after you done? (Yeah) \nA'ight, for sure, I got a jam \nYeah, yeah \nDon't step on your toes (bitch) \nAh, ah-ah yeah (Cole, you stupid) \nAh-ah, ah, ah yeah \nAh, ah, ah, yeah (yeah) \nUh-uh, uh-uh, uh-uh (yeah) \nUh-uh, uh-uh, uh-uh, uh-uh-uh, yeah (yeah, yeah, motherfucker)"
+    let shownLyrics = "";
+    let tL1 = trackLyrics.slice(0, trackLyrics.indexOf("..."));
+    let lyricArray = tL1.split("\n");
+    console.log(lyricArray);
+    console.log(tL1);
+    let segment = Math.floor(Math.random() * lyricArray.length);
+    console.log(segment);
+    if(segment < 2){
+        shownLyrics = lyricArray[0] + "\n" + lyricArray[1] + "\n" + lyricArray[2];
+        console.log("wokr");
+    }
+    else if (segment >= 2){
+        shownLyrics = lyricArray[segment - 2] + lyricArray[segment - 1] + lyricArray[segment];
+        console.log("work");
+    }
+    console.log(shownLyrics);
+    lyricsBox.innerText = shownLyrics;
     //this function needs to cut down the lyrics to a randomized section
 }
 
