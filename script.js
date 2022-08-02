@@ -164,7 +164,7 @@ artistInput.addEventListener("change", async () => {
     if(artistID == -1){
         trackLyrics = `You used to call me on my cell phone
         Late night when you need my love
-        Call me on my cell phone...`;
+        Call me on my cell phone`;
         console.log(trackLyrics);
         guessAnswer = "Hotline Bling";
         randTrack = {track: {
