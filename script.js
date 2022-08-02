@@ -115,7 +115,13 @@ async function getLyrics(apikey, artistTrack){
 function displayLyrics(trackLyrics){
     // trackLyrics = "Ayy, can you come to Henry's after you done? (Yeah) \nA'ight, for sure, I got a jam \nYeah, yeah \nDon't step on your toes (bitch) \nAh, ah-ah yeah (Cole, you stupid) \nAh-ah, ah, ah yeah \nAh, ah, ah, yeah (yeah) \nUh-uh, uh-uh, uh-uh (yeah) \nUh-uh, uh-uh, uh-uh, uh-uh-uh, yeah (yeah, yeah, motherfucker)"
     let shownLyrics = "";
-    let tL1 = trackLyrics.slice(0, trackLyrics.indexOf("..."));
+    let tL1 = "";
+    if(trackLyrics.includes("...")){
+        tL1 = trackLyrics.slice(0, trackLyrics.indexOf("..."));
+    }
+    else{
+        tL1 = trackLyrics;
+    }
     let lyricArray = tL1.split("\n");
     console.log(lyricArray);
     console.log(tL1);
@@ -126,7 +132,7 @@ function displayLyrics(trackLyrics){
         console.log("wokr");
     }
     else if (segment >= 2){
-        shownLyrics = lyricArray[segment - 2] + lyricArray[segment - 1] + lyricArray[segment];
+        shownLyrics = lyricArray[segment - 2] + "\n" + lyricArray[segment - 1] + "\n" + lyricArray[segment];
         console.log("work");
     }
     console.log(shownLyrics);
