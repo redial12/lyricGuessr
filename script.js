@@ -25,7 +25,7 @@ let randTrack;
 
 async function getArtistID(apikey, artist){
     //query for artist search (temporary solution using proxy)
-    const myQuery = `https://cors-anywhere.herokuapp.com/https://api.musixmatch.com/ws/1.1/artist.search?apikey=${apikey}&q_artist=${artist}
+    const myQuery = `https://api.musixmatch.com/ws/1.1/artist.search?apikey=${apikey}&q_artist=${artist}
     `;
     // const myQuery = `https://api.musixmatch.com/ws/1.1/artist.search?apikey=${apikey}&q_artist=${artist}
     // `;
@@ -50,7 +50,7 @@ async function getAlbums(apikey, artistID){
     //array to store album IDs
     let arrAlbums = [];
     //query to get albums using artist IDs
-    const myQuery = `https://cors-anywhere.herokuapp.com/https://api.musixmatch.com/ws/1.1/artist.albums.get?apikey=${apikey}&artist_id=${artistID}&page_size=4`;
+    const myQuery = `https://api.musixmatch.com/ws/1.1/artist.albums.get?apikey=${apikey}&artist_id=${artistID}&page_size=4`;
     console.log(myQuery);
     const response = await fetch(myQuery);
     if(!response.ok){
@@ -73,7 +73,7 @@ async function getTrack(apikey, artistAlbums){
     const randAlbumID = artistAlbums[randomNum];
     console.log("Random album ID: " + randAlbumID);
     //query to get tracks from random album
-    const myQuery = `https://cors-anywhere.herokuapp.com/https://api.musixmatch.com/ws/1.1/album.tracks.get?apikey=${apikey}&album_id=${randAlbumID}`;
+    const myQuery = `https://api.musixmatch.com/ws/1.1/album.tracks.get?apikey=${apikey}&album_id=${randAlbumID}`;
     const response = await fetch(myQuery);
     if(!response.ok){
         throw new Error(`Error! status: ${response.status}`);
@@ -91,7 +91,7 @@ async function getTrack(apikey, artistAlbums){
 async function getLyrics(apikey, artistTrack){
     let trackID = artistTrack.track.track_id;
     console.log(trackID);
-    const myQuery = `https://cors-anywhere.herokuapp.com/https://api.musixmatch.com/ws/1.1/track.lyrics.get?apikey=${apikey}&track_id=${trackID}`;
+    const myQuery = `https://api.musixmatch.com/ws/1.1/track.lyrics.get?apikey=${apikey}&track_id=${trackID}`;
     const response = await fetch(myQuery);
     if(!response.ok){
         throw new Error(`Error! status: ${response.status}`);
@@ -111,7 +111,13 @@ async function getLyrics(apikey, artistTrack){
 function displayLyrics(trackLyrics){
     // trackLyrics = "Ayy, can you come to Henry's after you done? (Yeah) \nA'ight, for sure, I got a jam \nYeah, yeah \nDon't step on your toes (bitch) \nAh, ah-ah yeah (Cole, you stupid) \nAh-ah, ah, ah yeah \nAh, ah, ah, yeah (yeah) \nUh-uh, uh-uh, uh-uh (yeah) \nUh-uh, uh-uh, uh-uh, uh-uh-uh, yeah (yeah, yeah, motherfucker)"
     let shownLyrics = "";
-    let tL1 = trackLyrics.slice(0, trackLyrics.indexOf("..."));
+    let tL1 = "";
+    if(trackLyrics.includes("...")){
+        tL1 = trackLyrics.slice(0, trackLyrics.indexOf("..."));
+    }
+    else{
+        tL1 = trackLyrics;
+    }
     let lyricArray = tL1.split("\n");
     console.log(lyricArray);
     console.log(tL1);
@@ -122,7 +128,7 @@ function displayLyrics(trackLyrics){
         console.log("wokr");
     }
     else if (segment >= 2){
-        shownLyrics = lyricArray[segment - 2] + lyricArray[segment - 1] + lyricArray[segment];
+        shownLyrics = lyricArray[segment - 2] + "\n" + lyricArray[segment - 1] + "\n" + lyricArray[segment];
         console.log("work");
     }
     console.log(shownLyrics);
@@ -158,7 +164,7 @@ artistInput.addEventListener("change", async () => {
     if(artistID == -1){
         trackLyrics = `You used to call me on my cell phone
         Late night when you need my love
-        Call me on my cell phone`;
+        Call me on my cell phone...`;
         console.log(trackLyrics);
         guessAnswer = "Hotline Bling";
         randTrack = {track: {
