@@ -24,11 +24,13 @@ let guessAnswer = "";
 let randTrack;
 
 async function getArtistID(apikey, artist){
+    //escape to hard-coded song for testing
+    if(artist == -1){
+        return -1;
+    }
     //query for artist search (temporary solution using proxy)
     const myQuery = `https://api.musixmatch.com/ws/1.1/artist.search?apikey=${apikey}&q_artist=${artist}
     `;
-    // const myQuery = `https://api.musixmatch.com/ws/1.1/artist.search?apikey=${apikey}&q_artist=${artist}
-    // `;
     const response = await fetch(myQuery, {
         mode: 'cors',
         header: {'Access-Control-Allow-Origin': "http://127.0.0.1:5500",
@@ -136,13 +138,25 @@ function displayLyrics(trackLyrics){
         console.log("work");
     }
     console.log(shownLyrics);
+    lyricsBox.classList.remove("has-text-grey-light");
     lyricsBox.innerText = shownLyrics;
     //this function needs to cut down the lyrics to a randomized section
 }
 
 function guessChecker(guess){
+    //ask juan for help on how to make the guessChecker better
+    const answersToCompare = [];
+    //crème brulée (something)
+    answersToCompare.push(guessAnswer.toLowerCase());
+    //creme brulee (something)
+    answersToCompare.push(answersToCompare[0].normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
+    //crème brulée
+    answersToCompare.push(answersToCompare[0].replace(/ \(.+\)/, ""));
+    //creme brulee
+    answersToCompare.push(answersToCompare[0].normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ \(.+\)/, ""));
+    console.log(answersToCompare);
     answerSection.classList.remove("hidden");
-    if(guess == guessAnswer.toLowerCase()){
+    if(answersToCompare.includes(guess)){
         console.log("Correct!");
         correctness.innerText = "Correct!"
     }else{
@@ -152,7 +166,10 @@ function guessChecker(guess){
     answerBox.innerHTML = `
     <h1 class="subtitle">
     The song name was </br>
-    <h1 class="title"><strong>${guessAnswer}</strong></h1></br>`+ answerBox.innerHTML + `</br>
+    <h1 class="title"><strong>${guessAnswer}</strong></h1></br>`+`
+    <figure class="image is-96x96 is-inline-block">
+        <img src="placeholder-image.png">
+    </figure> `+ `</br>
     on <strong>${randTrack.track.album_name}</strong>!
     </h1>`;
 }
@@ -190,16 +207,17 @@ artistInput.addEventListener("change", async () => {
 
         //function to get lyrics from track
         let trackLyrics = await getLyrics(apikey, artistTrack);
-        console.log(trackLyrics);
         displayLyrics(trackLyrics);
     }
     //function to put lyrics in box
 
     console.log(guessAnswer);
+    artistInput.value = "";
 });
 
 guessInput.addEventListener("change", async ()=> {
     let guess = guessInput.value.toLowerCase();
     console.log(guess);
     guessChecker(guess);
+    guessInput.value = "";
 })
