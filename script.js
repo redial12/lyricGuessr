@@ -27,11 +27,13 @@ let guessAnswer = "";
 let randTrack;
 
 async function getArtistID(apikey, artist){
+    //escape to hard-coded song for testing
+    if(artist == -1){
+        return -1;
+    }
     //query for artist search (temporary solution using proxy)
     const myQuery = `https://api.musixmatch.com/ws/1.1/artist.search?apikey=${apikey}&q_artist=${artist}
     `;
-    // const myQuery = `https://api.musixmatch.com/ws/1.1/artist.search?apikey=${apikey}&q_artist=${artist}
-    // `;
     const response = await fetch(myQuery, {
         mode: 'cors',
         header: {'Access-Control-Allow-Origin': "http://127.0.0.1:5500",
@@ -55,9 +57,6 @@ async function getArtistID(apikey, artist){
 }
 
 async function getAlbums(apikey, artistID){
-    if(artistID == -2){
-        return -2;
-    }
     //array to store album IDs
     let arrAlbums = [];
     const albumNames = new Set();
@@ -83,10 +82,6 @@ async function getAlbums(apikey, artistID){
 }
 
 async function getTrack(apikey, artistAlbums){
-    if(artistAlbums == -2){
-        guessAnswer = -2;
-        return -2;
-    }
     //pick from one of the albums
     const randomNum = Math.floor(Math.random() * artistAlbums.length);
     const randAlbumID = artistAlbums[randomNum];
@@ -108,9 +103,6 @@ async function getTrack(apikey, artistAlbums){
 }
 
 async function getLyrics(apikey, artistTrack){
-    if(artistTrack == -2){
-        return -2;
-    }
     let trackID = artistTrack.track.track_id;
     console.log(trackID);
     const myQuery = `https://api.musixmatch.com/ws/1.1/track.lyrics.get?apikey=${apikey}&track_id=${trackID}`;
@@ -131,10 +123,6 @@ async function getLyrics(apikey, artistTrack){
 
 
 function displayLyrics(trackLyrics){
-    if(trackLyrics == -2){
-        lyricsBox.innerText = "";
-        return -2;
-    }
     let shownLyrics = "";
     let tL1 = "";
     if(trackLyrics.includes("...")){
@@ -157,23 +145,44 @@ function displayLyrics(trackLyrics){
         console.log("work");
     }
     console.log(shownLyrics);
+    lyricsBox.classList.remove("has-text-grey-light");
     lyricsBox.innerText = shownLyrics;
     //this function needs to cut down the lyrics to a randomized section
 }
 
 function guessChecker(guess){
+
+    //ask juan for help on how to make the guessChecker better
+    const answersToCompare = [];
+
+    if(typeof guessAnswer != "number"){
+        //crème brulée (something)
+        answersToCompare.push(guessAnswer.toLowerCase());
+        //creme brulee (something)
+        answersToCompare.push(answersToCompare[0].normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
+        //crème brulée
+        answersToCompare.push(answersToCompare[0].replace(/ \(.+\)/, ""));
+        //creme brulee
+        answersToCompare.push(answersToCompare[0].normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ \(.+\)/, ""));
+        console.log(answersToCompare);
+    }
     answerSection.classList.remove("hidden");
     if(guessAnswer == -2){
         console.log("error");
         correctness.innerText = "error"
         answerBox.innerHTML = "error";
     }
-    else if(guess == guessAnswer.toLowerCase()){
+    else if(answersToCompare.includes(guess)){
         console.log("Correct!");
         correctness.innerText = "Correct!"
         answerBox.innerHTML = `
-    <h1 class="subtitle">
-    The song name was ${guessAnswer}!
+     <h1 class="subtitle">
+    The song name was </br>
+    <h1 class="title"><strong>${guessAnswer}</strong></h1></br>`+`
+    <figure class="image is-96x96 is-inline-block">
+        <img src="placeholder-image.png">
+    </figure> `+ `</br>
+    on <strong>${randTrack.track.album_name}</strong>!
     </h1>`;
     }else{
         console.log("Incorrect.");
@@ -181,7 +190,10 @@ function guessChecker(guess){
         answerBox.innerHTML = `
     <h1 class="subtitle">
     The song name was </br>
-    <h1 class="title"><strong>${guessAnswer}</strong></h1></br>`+ answerBox.innerHTML + `</br>
+    <h1 class="title"><strong>${guessAnswer}</strong></h1></br>`+`
+    <figure class="image is-96x96 is-inline-block">
+        <img src="placeholder-image.png">
+    </figure> `+ `</br>
     on <strong>${randTrack.track.album_name}</strong>!
     </h1>`;
     }
@@ -209,6 +221,9 @@ artistInput.addEventListener("change", async () => {
         }};
         console.log(randTrack);
         displayLyrics(trackLyrics);
+    }else if(artistID == -2){
+        guessAnswer = -2;
+        lyricsBox.innerText = "";
     }else{
         //function to get artist albums using ID
         let artistAlbums = await getAlbums(apikey, artistID);
@@ -220,16 +235,17 @@ artistInput.addEventListener("change", async () => {
 
         //function to get lyrics from track
         let trackLyrics = await getLyrics(apikey, artistTrack);
-        console.log(trackLyrics);
         displayLyrics(trackLyrics);
     }
     //function to put lyrics in box
 
     console.log(guessAnswer);
+    artistInput.value = "";
 });
 
 guessInput.addEventListener("change", async ()=> {
     let guess = guessInput.value.toLowerCase();
     console.log(guess);
     guessChecker(guess);
+    guessInput.value = "";
 })
