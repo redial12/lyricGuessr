@@ -151,17 +151,21 @@ function displayLyrics(trackLyrics){
 }
 
 function guessChecker(guess){
+
     //ask juan for help on how to make the guessChecker better
     const answersToCompare = [];
-    //crème brulée (something)
-    answersToCompare.push(guessAnswer.toLowerCase());
-    //creme brulee (something)
-    answersToCompare.push(answersToCompare[0].normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
-    //crème brulée
-    answersToCompare.push(answersToCompare[0].replace(/ \(.+\)/, ""));
-    //creme brulee
-    answersToCompare.push(answersToCompare[0].normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ \(.+\)/, ""));
-    console.log(answersToCompare);
+
+    if(typeof guessAnswer != "number"){
+        //crème brulée (something)
+        answersToCompare.push(guessAnswer.toLowerCase());
+        //creme brulee (something)
+        answersToCompare.push(answersToCompare[0].normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
+        //crème brulée
+        answersToCompare.push(answersToCompare[0].replace(/ \(.+\)/, ""));
+        //creme brulee
+        answersToCompare.push(answersToCompare[0].normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ \(.+\)/, ""));
+        console.log(answersToCompare);
+    }
     answerSection.classList.remove("hidden");
     if(guessAnswer == -2){
         console.log("error");
