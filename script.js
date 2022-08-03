@@ -55,9 +55,6 @@ async function getArtistID(apikey, artist){
 }
 
 async function getAlbums(apikey, artistID){
-    if(artistID == -2){
-        return -2;
-    }
     //array to store album IDs
     let arrAlbums = [];
     const albumNames = new Set();
@@ -83,10 +80,6 @@ async function getAlbums(apikey, artistID){
 }
 
 async function getTrack(apikey, artistAlbums){
-    if(artistAlbums == -2){
-        guessAnswer = -2;
-        return -2;
-    }
     //pick from one of the albums
     const randomNum = Math.floor(Math.random() * artistAlbums.length);
     const randAlbumID = artistAlbums[randomNum];
@@ -108,9 +101,6 @@ async function getTrack(apikey, artistAlbums){
 }
 
 async function getLyrics(apikey, artistTrack){
-    if(artistTrack == -2){
-        return -2;
-    }
     let trackID = artistTrack.track.track_id;
     console.log(trackID);
     const myQuery = `https://api.musixmatch.com/ws/1.1/track.lyrics.get?apikey=${apikey}&track_id=${trackID}`;
@@ -131,10 +121,6 @@ async function getLyrics(apikey, artistTrack){
 
 
 function displayLyrics(trackLyrics){
-    if(trackLyrics == -2){
-        lyricsBox.innerText = "";
-        return -2;
-    }
     let shownLyrics = "";
     let tL1 = "";
     if(trackLyrics.includes("...")){
@@ -209,6 +195,9 @@ artistInput.addEventListener("change", async () => {
         }};
         console.log(randTrack);
         displayLyrics(trackLyrics);
+    }else if(artistID == -2){
+        guessAnswer = -2;
+        lyricsBox.innerText = "";
     }else{
         //function to get artist albums using ID
         let artistAlbums = await getAlbums(apikey, artistID);
