@@ -37,7 +37,7 @@ async function getArtistID(apikey, artist){
         header: {'Access-Control-Allow-Origin': "http://127.0.0.1:5500",
         'Access-Control-Allow-Headers' : "Origin, X-Requested With, Content-Type, Accept"},
     });
-
+    //to start using hard-coded data
     if(!response.ok){
         return -1;
     }
@@ -60,8 +60,9 @@ async function getAlbums(apikey, artistID){
     }
     //array to store album IDs
     let arrAlbums = [];
+    const albumNames = new Set();
     //query to get albums using artist IDs
-    const myQuery = `https://api.musixmatch.com/ws/1.1/artist.albums.get?apikey=${apikey}&artist_id=${artistID}&page_size=4`;
+    const myQuery = `https://api.musixmatch.com/ws/1.1/artist.albums.get?apikey=${apikey}&artist_id=${artistID}&page_size=10`;
     console.log(myQuery);
     const response = await fetch(myQuery);
     if(!response.ok){
@@ -71,9 +72,12 @@ async function getAlbums(apikey, artistID){
     const data = await response.json();
     console.log(data);
     data.message.body.album_list.forEach(element => {
-        console.log(element.album.album_name);
-        console.log(element.album.album_id);
-        arrAlbums.push(element.album.album_id);
+        if(!albumNames.has(element.album.album_name)){
+            albumNames.add(element.album.album_name);
+            arrAlbums.push(element.album.album_id);
+            console.log(element.album.album_name);
+            console.log(element.album.album_id);
+        }
     });
     return arrAlbums;
 }
@@ -176,7 +180,9 @@ function guessChecker(guess){
         correctness.innerText = "Incorrect!"
         answerBox.innerHTML = `
     <h1 class="subtitle">
-    The song name was ${guessAnswer}!
+    The song name was </br>
+    <h1 class="title"><strong>${guessAnswer}</strong></h1></br>`+ answerBox.innerHTML + `</br>
+    on <strong>${randTrack.track.album_name}</strong>!
     </h1>`;
     }
 }
@@ -194,12 +200,12 @@ artistInput.addEventListener("change", async () => {
     if(artistID == -1){
         trackLyrics = `You used to call me on my cell phone
         Late night when you need my love
-        Call me on my cell phone...`;
+        Call me on my cell phone`;
         console.log(trackLyrics);
         guessAnswer = "Hotline Bling";
         randTrack = {track: {
             track_name: guessAnswer,
-            track_album: "Views",
+            album_name: "Views",
         }};
         console.log(randTrack);
         displayLyrics(trackLyrics);
