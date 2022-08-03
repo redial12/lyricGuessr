@@ -1,6 +1,9 @@
+//score and winstreak variables
+let score = 0;
+let winstreak = 0; 
+
 //musixmatch api key
 const apikey = "251585f21f0dcde77139880f7198a2ea";
-
 
 //first input for an artist
 const artistInput = document.querySelector("#artistInput");
@@ -38,15 +41,23 @@ async function getArtistID(apikey, artist){
     if(!response.ok){
         return -1;
     }
-
     // console.log(response);
     const data = await response.json();
     console.log(data);
+    if(data.message.body.artist_list.length == 0){
+        alert("We couldn't find that artist!");
+        return -2;
+    }
     const artistID = data.message.body.artist_list[0].artist.artist_id;
     return artistID;
+
+    
 }
 
 async function getAlbums(apikey, artistID){
+    if(artistID == -2){
+        return -2;
+    }
     //array to store album IDs
     let arrAlbums = [];
     const albumNames = new Set();
@@ -72,7 +83,11 @@ async function getAlbums(apikey, artistID){
 }
 
 async function getTrack(apikey, artistAlbums){
-    //pick from one of the combined tracklist
+    if(artistAlbums == -2){
+        guessAnswer = -2;
+        return -2;
+    }
+    //pick from one of the albums
     const randomNum = Math.floor(Math.random() * artistAlbums.length);
     const randAlbumID = artistAlbums[randomNum];
     console.log("Random album ID: " + randAlbumID);
@@ -93,6 +108,9 @@ async function getTrack(apikey, artistAlbums){
 }
 
 async function getLyrics(apikey, artistTrack){
+    if(artistTrack == -2){
+        return -2;
+    }
     let trackID = artistTrack.track.track_id;
     console.log(trackID);
     const myQuery = `https://api.musixmatch.com/ws/1.1/track.lyrics.get?apikey=${apikey}&track_id=${trackID}`;
@@ -113,7 +131,10 @@ async function getLyrics(apikey, artistTrack){
 
 
 function displayLyrics(trackLyrics){
-    // trackLyrics = "Ayy, can you come to Henry's after you done? (Yeah) \nA'ight, for sure, I got a jam \nYeah, yeah \nDon't step on your toes (bitch) \nAh, ah-ah yeah (Cole, you stupid) \nAh-ah, ah, ah yeah \nAh, ah, ah, yeah (yeah) \nUh-uh, uh-uh, uh-uh (yeah) \nUh-uh, uh-uh, uh-uh, uh-uh-uh, yeah (yeah, yeah, motherfucker)"
+    if(trackLyrics == -2){
+        lyricsBox.innerText = "";
+        return -2;
+    }
     let shownLyrics = "";
     let tL1 = "";
     if(trackLyrics.includes("...")){
@@ -142,19 +163,28 @@ function displayLyrics(trackLyrics){
 
 function guessChecker(guess){
     answerSection.classList.remove("hidden");
-    if(guess == guessAnswer.toLowerCase()){
+    if(guessAnswer == -2){
+        console.log("error");
+        correctness.innerText = "error"
+        answerBox.innerHTML = "error";
+    }
+    else if(guess == guessAnswer.toLowerCase()){
         console.log("Correct!");
         correctness.innerText = "Correct!"
+        answerBox.innerHTML = `
+    <h1 class="subtitle">
+    The song name was ${guessAnswer}!
+    </h1>`;
     }else{
         console.log("Incorrect.");
         correctness.innerText = "Incorrect!"
-    }
-    answerBox.innerHTML = `
+        answerBox.innerHTML = `
     <h1 class="subtitle">
     The song name was </br>
     <h1 class="title"><strong>${guessAnswer}</strong></h1></br>`+ answerBox.innerHTML + `</br>
     on <strong>${randTrack.track.album_name}</strong>!
     </h1>`;
+    }
 }
 
 artistInput.addEventListener("change", async () => {
