@@ -1,6 +1,9 @@
+//score and winstreak variables
+let score = 0;
+let winstreak = 0; 
+
 //musixmatch api key
 const apikey = "251585f21f0dcde77139880f7198a2ea";
-
 
 //first input for an artist
 const artistInput = document.querySelector("#artistInput");
@@ -40,12 +43,17 @@ async function getArtistID(apikey, artist){
     if(!response.ok){
         return -1;
     }
-
     // console.log(response);
     const data = await response.json();
     console.log(data);
+    if(data.message.body.artist_list.length == 0){
+        alert("We couldn't find that artist!");
+        return -2;
+    }
     const artistID = data.message.body.artist_list[0].artist.artist_id;
     return artistID;
+
+    
 }
 
 async function getAlbums(apikey, artistID){
@@ -74,7 +82,7 @@ async function getAlbums(apikey, artistID){
 }
 
 async function getTrack(apikey, artistAlbums){
-    //pick from one of the combined tracklist
+    //pick from one of the albums
     const randomNum = Math.floor(Math.random() * artistAlbums.length);
     const randAlbumID = artistAlbums[randomNum];
     console.log("Random album ID: " + randAlbumID);
@@ -115,7 +123,6 @@ async function getLyrics(apikey, artistTrack){
 
 
 function displayLyrics(trackLyrics){
-    // trackLyrics = "Ayy, can you come to Henry's after you done? (Yeah) \nA'ight, for sure, I got a jam \nYeah, yeah \nDon't step on your toes (bitch) \nAh, ah-ah yeah (Cole, you stupid) \nAh-ah, ah, ah yeah \nAh, ah, ah, yeah (yeah) \nUh-uh, uh-uh, uh-uh (yeah) \nUh-uh, uh-uh, uh-uh, uh-uh-uh, yeah (yeah, yeah, motherfucker)"
     let shownLyrics = "";
     let tL1 = "";
     if(trackLyrics.includes("...")){
@@ -156,14 +163,27 @@ function guessChecker(guess){
     answersToCompare.push(answersToCompare[0].normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ \(.+\)/, ""));
     console.log(answersToCompare);
     answerSection.classList.remove("hidden");
-    if(answersToCompare.includes(guess)){
+    if(guessAnswer == -2){
+        console.log("error");
+        correctness.innerText = "error"
+        answerBox.innerHTML = "error";
+    }
+    else if(answersToCompare.includes(guess)){
         console.log("Correct!");
         correctness.innerText = "Correct!"
+        answerBox.innerHTML = `
+     <h1 class="subtitle">
+    The song name was </br>
+    <h1 class="title"><strong>${guessAnswer}</strong></h1></br>`+`
+    <figure class="image is-96x96 is-inline-block">
+        <img src="placeholder-image.png">
+    </figure> `+ `</br>
+    on <strong>${randTrack.track.album_name}</strong>!
+    </h1>`;
     }else{
         console.log("Incorrect.");
         correctness.innerText = "Incorrect!"
-    }
-    answerBox.innerHTML = `
+        answerBox.innerHTML = `
     <h1 class="subtitle">
     The song name was </br>
     <h1 class="title"><strong>${guessAnswer}</strong></h1></br>`+`
@@ -172,6 +192,7 @@ function guessChecker(guess){
     </figure> `+ `</br>
     on <strong>${randTrack.track.album_name}</strong>!
     </h1>`;
+    }
 }
 
 artistInput.addEventListener("change", async () => {
@@ -196,6 +217,9 @@ artistInput.addEventListener("change", async () => {
         }};
         console.log(randTrack);
         displayLyrics(trackLyrics);
+    }else if(artistID == -2){
+        guessAnswer = -2;
+        lyricsBox.innerText = "";
     }else{
         //function to get artist albums using ID
         let artistAlbums = await getAlbums(apikey, artistID);
