@@ -39,7 +39,8 @@ async function getArtistID(apikey, artist){
         header: {'Access-Control-Allow-Origin': "http://127.0.0.1:5500",
         'Access-Control-Allow-Headers' : "Origin, X-Requested With, Content-Type, Accept"},
     });
-    //to start using hard-coded data
+    answerBox.innerHTML = "";
+    //to start using hard-coded data (note for jean, what does this do?)
     if(!response.ok){
         return -1;
     }
@@ -121,10 +122,11 @@ async function getLyrics(apikey, artistTrack){
 }
 
 
-
+//TO DO: GET A DIFFERENT SONG IF HAVE NO LYRICS
 function displayLyrics(trackLyrics){
     let shownLyrics = "";
     let tL1 = "";
+    console.log(trackLyrics);
     if(trackLyrics.includes("...")){
         tL1 = trackLyrics.slice(0, trackLyrics.indexOf("..."));
     }
@@ -134,15 +136,29 @@ function displayLyrics(trackLyrics){
     let lyricArray = tL1.split("\n");
     console.log(lyricArray);
     console.log(tL1);
-    let segment = Math.floor(Math.random() * lyricArray.length);
-    console.log(segment);
-    if(segment < 2){
-        shownLyrics = lyricArray[0] + "\n" + lyricArray[1] + "\n" + lyricArray[2];
-        console.log("wokr");
+    for( var i = 0; i < lyricArray.length; i++){ 
+    
+        if ( lyricArray[i] === "") { 
+    
+            lyricArray.splice(i, 1); 
+        }
+    
     }
-    else if (segment >= 2){
-        shownLyrics = lyricArray[segment - 2] + "\n" + lyricArray[segment - 1] + "\n" + lyricArray[segment];
-        console.log("work");
+    if(lyricArray.length < 3){
+        for(let i = 0; i < lyricArray.length; i++ ){
+            shownLyrics += lyricArray[i] + "\n"
+        }
+    }
+    let segment = [Math.floor(Math.random() * (lyricArray.length - 3))] ;
+    //for loop that checks first unempty string and adds it to the shownlyrics
+    let count = 0;
+    console.log("working");
+    for(let i = segment; i < lyricArray.length; i++ ){
+        shownLyrics += lyricArray[i] + "\n"
+        count++; 
+        if(count == 3){
+            break;
+        }
     }
     console.log(shownLyrics);
     lyricsBox.classList.remove("has-text-grey-light");
@@ -184,6 +200,10 @@ function guessChecker(guess){
     </figure> `+ `</br>
     on <strong>${randTrack.track.album_name}</strong>!
     </h1>`;
+        score += 100;
+        winstreak += 1;
+        window.localStorage.setItem("Score", score);
+        window.localStorage.setItem("Winstreak", winstreak); 
     }else{
         console.log("Incorrect.");
         correctness.innerText = "Incorrect!"
@@ -199,7 +219,10 @@ function guessChecker(guess){
     }
 }
 
-artistInput.addEventListener("change", async () => {
+artistInput.addEventListener("keypress", async (e) => {
+    if(e.key!="Enter"){
+        return;
+    }
     let artist = artistInput.value;
     //replace all spaces with underscores
     artist = artist.replace(/ /gi, "_");
@@ -224,6 +247,9 @@ artistInput.addEventListener("change", async () => {
     }else if(artistID == -2){
         guessAnswer = -2;
         lyricsBox.innerText = "";
+        console.log("error");
+        correctness.innerText = "error"
+        answerBox.innerHTML = "error";
     }else{
         //function to get artist albums using ID
         let artistAlbums = await getAlbums(apikey, artistID);
@@ -240,7 +266,6 @@ artistInput.addEventListener("change", async () => {
     //function to put lyrics in box
 
     console.log(guessAnswer);
-    artistInput.value = "";
 });
 
 guessInput.addEventListener("change", async ()=> {
