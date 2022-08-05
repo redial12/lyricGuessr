@@ -2,7 +2,7 @@
 let score;
 let winstreak;
 //musixmatch api key
-const apikey = "251585f21f0dcde77139880f7198a2ea";
+const apikey = "84f4ec2655a2263d350ed92946c2cdeb";
 
 //spotify api stuff
 var client_id = "38df025f2f344c0cb44bac86a7e50fb1";
@@ -253,7 +253,14 @@ function displayLyrics(trackLyrics){
 async function guessChecker(guess){
 
     const answersToCompare = [];
-    const image = await getSongSpotify(guessAnswer);
+    var image;
+    if(currentToken != ""){
+        image = await getSongSpotify(currentToken, guessAnswer);
+        console.log(image);
+    }else{
+        image = "placeholder-image.png";
+    }
+    
 
     if(typeof guessAnswer != "number"){
         //crème brulée (something)
@@ -280,7 +287,7 @@ async function guessChecker(guess){
     The song name was </br>
     <h1 class="title"><strong>${guessAnswer}</strong></h1></br>`+`
     <figure class="image is-96x96 is-inline-block">
-        <img src="placeholder-image.png">
+        <img src="${image}">
     </figure> `+ `</br>
     on <strong>${randTrack.track.album_name}</strong> by <strong>${randTrack.track.artist_name}</strong>!
     </h1>`;
@@ -301,7 +308,7 @@ async function guessChecker(guess){
     The song name was </br>
     <h1 class="title"><strong>${guessAnswer}</strong></h1></br>`+`
     <figure class="image is-96x96 is-inline-block">
-        <img src="placeholder-image.png">
+        <img src="${image}">
     </figure> `+ `</br>
     on <strong>${randTrack.track.album_name}</strong> by <strong>${randTrack.track.artist_name}</strong>!
     </h1>`;
@@ -467,8 +474,9 @@ async function randomSpotifyArtist(arrayArtists){
     console.log(guessAnswer);
 }
 
-async function getSongSpotify(song){
-    const myQuery = `https://api.spotify.com/v1/search?q=${song}&type=track`;
+async function getSongSpotify(token, song){
+    const album = randTrack.track.album_name;
+    const myQuery = `https://api.spotify.com/v1/search?q=${song}%20album:${album}&type=track`;
     let result;
     await fetch(myQuery, {
         headers: {
@@ -485,7 +493,9 @@ async function getSongSpotify(song){
         return await response.json();
     })
     .then(function(data){ result=data; })
-    return result;
+    console.log(result);
+    var image = result.tracks.items[0].album.images[0].url;
+    return image;
 }
 
 function onLoad(){
