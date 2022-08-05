@@ -494,7 +494,11 @@ async function getSongSpotify(token, song){
     })
     .then(function(data){ result=data; })
     console.log(result);
-    var image = result.tracks.items[0].album.images[0].url;
+    if(result.tracks.items[0] !== undefined){
+        var image = result.tracks.items[0].album.images[0].url;
+    }else{
+        var image = "placeholder-image.png"
+    }
     return image;
 }
 
