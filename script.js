@@ -5,22 +5,28 @@ let winstreak = 0;
 //musixmatch api key
 const apikey = "251585f21f0dcde77139880f7198a2ea";
 
+//spotify api stuff
+var client_id = "38df025f2f344c0cb44bac86a7e50fb1";
+var client_secret = "b552b65ef19747a5ba46b6ba887d79a7";
+var redirect_uri = "http://127.0.0.1:5501/";
+
+var currentToken ="";
+var refreshToken = "";
+var code = "";
+
 //first input for an artist
 const artistInput = document.querySelector("#artistInput");
-
 //selector for lyrics box
 const lyricsBox = document.querySelector("#lyricsBox");
-
 //guess input
 const guessInput = document.querySelector("#guessInput");
-
 //correct answer info
 const answerBox = document.querySelector("#answerBox");
-
 //display incorrect or correct
 const correctness = document.querySelector("#correctness");
-
 const answerSection = document.querySelector("#answerSection");
+const loginButton = document.querySelector("#loginButton");
+const spotifyBlock = document.querySelector("#spotifyBlock");
 
 let guessAnswer = "";
 
@@ -84,7 +90,7 @@ async function getAlbums(apikey, artistID){
 
 async function getTrack(apikey, artistAlbums){
     //pick from one of the albums
-    const randomNum = Math.floor(Math.random() * artistAlbums.length);
+    var randomNum = Math.floor(Math.random() * artistAlbums.length);
     const randAlbumID = artistAlbums[randomNum];
     console.log("Random album ID: " + randAlbumID);
     //query to get tracks from random album
@@ -97,8 +103,20 @@ async function getTrack(apikey, artistAlbums){
     const data = await response.json();
     console.log(data);
     //get trackList array and pick a random track
-    const trackList = data.message.body.track_list;
-    randTrack = trackList[Math.floor(Math.random()*trackList.length)];
+    var trackList = data.message.body.track_list;
+    randomNum = Math.floor(Math.random()*trackList.length);
+    randTrack = trackList[randomNum];
+    var counter = trackList.length;
+    console.log(randTrack);
+    while(randTrack.track.has_lyrics == 0 && counter != 0){
+        trackList.splice(randomNum, 1);
+        randTrack = trackList[randomNum];
+        counter--;
+        console.log(randTrack);
+    }
+    if(counter == 0){
+        throw new Error(`No songs with lyrics in Album!`);
+    }
     guessAnswer = randTrack.track.track_name;
     return randTrack;
 }
@@ -198,7 +216,7 @@ function guessChecker(guess){
     <figure class="image is-96x96 is-inline-block">
         <img src="placeholder-image.png">
     </figure> `+ `</br>
-    on <strong>${randTrack.track.album_name}</strong>!
+    on <strong>${randTrack.track.album_name}</strong> by <strong>${randTrack.track.artist_name}</strong>!
     </h1>`;
         score += 100;
         winstreak += 1;
@@ -214,10 +232,213 @@ function guessChecker(guess){
     <figure class="image is-96x96 is-inline-block">
         <img src="placeholder-image.png">
     </figure> `+ `</br>
-    on <strong>${randTrack.track.album_name}</strong>!
+    on <strong>${randTrack.track.album_name}</strong> by <strong>${randTrack.track.artist_name}</strong>!
     </h1>`;
     }
 }
+
+/* --- SPOTIFY FUNCTIONS --- */
+function getCookie(cname) {
+    let name = cname + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for(let i = 0; i <ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return "";
+}
+
+var generateRandomString = function(length) {
+    var text = '';
+    var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  
+    for (var i = 0; i < length; i++) {
+      text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+    return text;
+  };
+
+async function getAuth(){
+    var response_type =  "code";
+    var scope = "user-top-read playlist-read-private user-library-read"
+    var state = generateRandomString(16);
+    var myQuery = `https://accounts.spotify.com/authorize?client_id=${client_id}&scope=${scope}&redirect_uri=${redirect_uri}&state=${state}&response_type=${response_type}&show_dialog=true`;
+    const response = await fetch(myQuery);
+    if(!response.ok){
+        throw new Error(`Error! status: ${response.status}`);
+    }
+    console.log(response);
+    console.log(response.url);
+    document.cookie = `storedState=${state}`;
+    window.location.href = response.url;
+}
+
+async function getToken(code){
+    const myQuery = `https://accounts.spotify.com/api/token`;
+    const params = new URLSearchParams({
+        grant_type: 'authorization_code',
+        code: code,
+        redirect_uri: redirect_uri
+    });
+    const response = await fetch(myQuery, {
+        method: 'POST',
+        headers: {
+            "Authorization": 'Basic ' + btoa(client_id + ':' + client_secret),
+            "Content-Type": 'application/x-www-form-urlencoded'
+        },
+        body: params
+    });
+    console.log(response);
+    const data = await response.json();
+    console.log(data);
+    currentToken = data.access_token;
+    refreshToken = data.refresh_token;
+    return data;
+}
+
+async function refreshTokenFunction(refToken){
+    const myQuery = `https://accounts.spotify.com/api/token`;
+    const params = new URLSearchParams({
+        grant_type: 'refresh_token',
+        refresh_token: refToken
+    });
+    const response = await fetch(myQuery, {
+        method: 'POST',
+        headers: {
+            "Authorization": 'Basic ' + btoa(client_id + ':' + client_secret),
+            "Content-Type": 'application/x-www-form-urlencoded'
+        },
+        body: params
+    });
+    console.log(response);
+    const data = await response.json();
+    console.log(data);
+    currentToken = data.access_token;
+    return data;
+}
+
+async function getTopArtists(token){
+    const myQuery = `https://api.spotify.com/v1/me/top/artists`;
+    let result;
+    await fetch(myQuery, {
+        headers: {
+            "Authorization": "Bearer " + token,
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        }
+    })
+    .then(async(response) => {
+        if(response.status === 403){
+            console.log(response);
+            refreshTokenFunction(refreshToken);
+        }
+        return await response.json();
+    })
+    .then(function(data){ result=data; })
+    return result;
+}
+
+function topSpotifyArtist(artistsData){
+    var arrayArtists = [];
+    artistsData.items.forEach(item => {
+        arrayArtists.push(item.name);
+    })
+    console.log(arrayArtists);
+    return arrayArtists;
+}
+
+async function randomSpotifyArtist(arrayArtists){
+    var randomNum = Math.floor(Math.random()*arrayArtists.length);
+    var artist = arrayArtists[randomNum];
+    var artistID = await getArtistID(apikey, artist);
+    console.log(artist);
+    console.log(artistID);
+
+    if(artistID == -1){
+        trackLyrics = `You used to call me on my cell phone
+        Late night when you need my love
+        Call me on my cell phone`;
+        console.log(trackLyrics);
+        guessAnswer = "Hotline Bling";
+        randTrack = {track: {
+            track_name: guessAnswer,
+            album_name: "Views",
+        }};
+        console.log(randTrack);
+        displayLyrics(trackLyrics);
+    }else if(artistID == -2){
+        guessAnswer = -2;
+        lyricsBox.innerText = "";
+        console.log("error");
+        correctness.innerText = "error"
+        answerBox.innerHTML = "error";
+    }else{
+        //function to get artist albums using ID
+        let artistAlbums = await getAlbums(apikey, artistID);
+        console.log(artistAlbums);
+
+        //function to get a track from album
+        let artistTrack = await getTrack(apikey, artistAlbums);
+        console.log(artistTrack);
+
+        //function to get lyrics from track
+        let trackLyrics = await getLyrics(apikey, artistTrack);
+        displayLyrics(trackLyrics);
+    }
+    //function to put lyrics in box
+
+    console.log(guessAnswer);
+}
+
+function onLoad(){
+    //check if coookie is empty?
+    const queryString = window.location.search;
+    console.log(getCookie("storedState"));
+    //if on starter page with no params
+    if(queryString == ""){
+        //show login button on default start page
+    }else{
+        const urlParams = new URLSearchParams(queryString);
+        code = urlParams.get('code');
+        const state = urlParams.get('state');
+        if(state === null || state !== getCookie("storedState") || code === null){
+            //Something went wrong...
+            window.location.href = "index.html";
+        }else{
+            console.log("Auth success!");
+            //delete cookie after
+            getToken(code);
+        }
+        console.log(code);
+        console.log(state);
+
+        //change spotify display to select song
+        spotifyBlock.innerHTML = `
+        <h1 class="subtitle">Random lyrics from your top Spotify Artists!</h1>
+        <div class="columns is-centered">
+            <div class="column">
+                <button id="playButton" class="button is-success is-rounded">Play</button>
+            </div>
+        </div>
+        `;
+        const playButton = document.querySelector("#playButton");
+
+        playButton.addEventListener("click", async () => {
+            const artistsData = await getTopArtists(currentToken);
+            console.log(artistsData);
+            console.log("Got tracks!");
+            const arrayArtists = topSpotifyArtist(artistsData);
+            randomSpotifyArtist(arrayArtists);
+        });
+    }
+}
+/* --- END SPOTIFY FUNCTIONS ---*/
 
 artistInput.addEventListener("keypress", async (e) => {
     if(e.key!="Enter"){
@@ -268,9 +489,15 @@ artistInput.addEventListener("keypress", async (e) => {
     console.log(guessAnswer);
 });
 
+loginButton.addEventListener("click", async () => {
+    getAuth();
+});
+
 guessInput.addEventListener("change", async ()=> {
     let guess = guessInput.value.toLowerCase();
     console.log(guess);
     guessChecker(guess);
     guessInput.value = "";
-})
+});
+
+onLoad();
