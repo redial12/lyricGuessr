@@ -15,7 +15,7 @@
                 <div class="level-item">
                     <div class="hero-body">
                         <div>
-                            <p class="title">lyricGuessr</p>
+                            <p class="title" href="index.html">lyricGuessr</p>
                             <div class="block"></div>
                             <p class="subtitle">Are you really a fan?</p>
                         </div>
@@ -44,11 +44,11 @@
         <div class="block">
             <input id="artistInput" class="input is-rounded" type="text" placeholder="Isaiah Rashad">
         </div>
-        <block class="block has-text-centered">
-            <h1 class="subtitle">or pick from your Spotify Library.</h1>
+        <block id="spotifyBlock" class="block has-text-centered">
+            <h1 class="subtitle">or random lyrics from your top Spotify Artists.</h1>
             <div class="columns is-centered">
                 <div class="column">
-                    <button class="button is-success is-rounded">Login</button>
+                    <button id="loginButton" class="button is-success is-rounded">Login with Spotify</button>
                 </div>
             </div>
         </block>
@@ -76,7 +76,7 @@
     <footer class="footer has-background-grey-dark has-text-success-light">
         <div class="content has-text-centered">
           <p>
-            lyricGuessr by Jean-Claude Bissou and Seyaul Kim. Created using the <a src="https://developer.musixmatch.com/documentation" target="_blank">MusixMatch API</a>.
+            lyricGuessr by Jean-Claude Bissou and Seyaul Kim. Created using the <a href="https://developer.musixmatch.com/documentation" target="_blank">MusixMatch</a> and <a href="https://developer.spotify.com/documentation/web-api/reference/#/" target="_blank">Spotify</a> API.
           </p>
         </div>
     </footer>
