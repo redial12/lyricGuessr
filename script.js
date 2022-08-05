@@ -250,10 +250,10 @@ function displayLyrics(trackLyrics){
     //this function needs to cut down the lyrics to a randomized section
 }
 
-function guessChecker(guess){
+async function guessChecker(guess){
 
-    //ask juan for help on how to make the guessChecker better
     const answersToCompare = [];
+    const image = await getSongSpotify(guessAnswer);
 
     if(typeof guessAnswer != "number"){
         //crème brulée (something)
@@ -465,6 +465,27 @@ async function randomSpotifyArtist(arrayArtists){
     //function to put lyrics in box
 
     console.log(guessAnswer);
+}
+
+async function getSongSpotify(song){
+    const myQuery = `https://api.spotify.com/v1/search?q=${song}&type=track`;
+    let result;
+    await fetch(myQuery, {
+        headers: {
+            "Authorization": "Bearer " + token,
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        }
+    })
+    .then(async(response) => {
+        if(response.status === 403){
+            console.log(response);
+            refreshTokenFunction(refreshToken);
+        }
+        return await response.json();
+    })
+    .then(function(data){ result=data; })
+    return result;
 }
 
 function onLoad(){
