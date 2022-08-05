@@ -22,9 +22,20 @@ const correctness = document.querySelector("#correctness");
 
 const answerSection = document.querySelector("#answerSection");
 
+const scoreVal = document.querySelector("#scoreVal");
+
+const winstreakVal = document.querySelector("#winstreakVal");
+
 let guessAnswer = "";
 
 let randTrack;
+
+let scoreSt = window.localStorage.getItem("Score");
+let winstreakSt = window.localStorage.getItem("Winstreak");
+if(scoreSt != null){
+    scoreVal.innerHTML = `<h2 class="subtitle">Score: ${scoreSt}</h2>`;
+    winstreakVal.innerHTML = `<h2 class="subtitle">Winstreak: ${winstreakSt}</h2>`;
+}
 
 async function getArtistID(apikey, artist){
     //escape to hard-coded song for testing
@@ -204,7 +215,12 @@ function guessChecker(guess){
         winstreak += 1;
         window.localStorage.setItem("Score", score);
         window.localStorage.setItem("Winstreak", winstreak); 
+        scoreVal.innerHTML = `<h2 class="subtitle">Score: ${score}</h2>`;
+        winstreakVal.innerHTML = `<h2 class="subtitle">Winstreak: ${winstreak}</h2>`;
     }else{
+        winstreak = 0;
+        window.localStorage.setItem("Winstreak", winstreak);
+        winstreakVal.innerHTML = `<h2 class="subtitle">Winstreak: ${winstreak}</h2>`;
         console.log("Incorrect.");
         correctness.innerText = "Incorrect!"
         answerBox.innerHTML = `
@@ -274,3 +290,5 @@ guessInput.addEventListener("change", async ()=> {
     guessChecker(guess);
     guessInput.value = "";
 })
+
+
