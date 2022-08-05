@@ -286,7 +286,7 @@ async function guessChecker(guess){
      <h1 class="subtitle">
     The song name was </br>
     <h1 class="title"><strong>${guessAnswer}</strong></h1></br>`+`
-    <figure class="image is-96x96 is-inline-block">
+    <figure class="image is-128x128 is-inline-block">
         <img src="${image}">
     </figure> `+ `</br>
     on <strong>${randTrack.track.album_name}</strong> by <strong>${randTrack.track.artist_name}</strong>!
@@ -307,7 +307,7 @@ async function guessChecker(guess){
     <h1 class="subtitle">
     The song name was </br>
     <h1 class="title"><strong>${guessAnswer}</strong></h1></br>`+`
-    <figure class="image is-96x96 is-inline-block">
+    <figure class="image is-128x128 is-inline-block">
         <img src="${image}">
     </figure> `+ `</br>
     on <strong>${randTrack.track.album_name}</strong> by <strong>${randTrack.track.artist_name}</strong>!
