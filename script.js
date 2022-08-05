@@ -250,10 +250,17 @@ function displayLyrics(trackLyrics){
     //this function needs to cut down the lyrics to a randomized section
 }
 
-function guessChecker(guess){
+async function guessChecker(guess){
 
-    //ask juan for help on how to make the guessChecker better
     const answersToCompare = [];
+    var image;
+    if(currentToken != ""){
+        image = await getSongSpotify(currentToken, guessAnswer);
+        console.log(image);
+    }else{
+        image = "placeholder-image.png";
+    }
+    
 
     if(typeof guessAnswer != "number"){
         //crème brulée (something)
@@ -280,7 +287,7 @@ function guessChecker(guess){
     The song name was </br>
     <h1 class="title"><strong>${guessAnswer}</strong></h1></br>`+`
     <figure class="image is-96x96 is-inline-block">
-        <img src="placeholder-image.png">
+        <img src="${image}">
     </figure> `+ `</br>
     on <strong>${randTrack.track.album_name}</strong> by <strong>${randTrack.track.artist_name}</strong>!
     </h1>`;
@@ -301,7 +308,7 @@ function guessChecker(guess){
     The song name was </br>
     <h1 class="title"><strong>${guessAnswer}</strong></h1></br>`+`
     <figure class="image is-96x96 is-inline-block">
-        <img src="placeholder-image.png">
+        <img src="${image}">
     </figure> `+ `</br>
     on <strong>${randTrack.track.album_name}</strong> by <strong>${randTrack.track.artist_name}</strong>!
     </h1>`;
@@ -465,6 +472,30 @@ async function randomSpotifyArtist(arrayArtists){
     //function to put lyrics in box
 
     console.log(guessAnswer);
+}
+
+async function getSongSpotify(token, song){
+    const album = randTrack.track.album_name;
+    const myQuery = `https://api.spotify.com/v1/search?q=${song}%20album:${album}&type=track`;
+    let result;
+    await fetch(myQuery, {
+        headers: {
+            "Authorization": "Bearer " + token,
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        }
+    })
+    .then(async(response) => {
+        if(response.status === 403){
+            console.log(response);
+            refreshTokenFunction(refreshToken);
+        }
+        return await response.json();
+    })
+    .then(function(data){ result=data; })
+    console.log(result);
+    var image = result.tracks.items[0].album.images[0].url;
+    return image;
 }
 
 function onLoad(){
