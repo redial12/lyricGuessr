@@ -1,7 +1,6 @@
 //score and winstreak variables
-let score = 0;
-let winstreak = 0; 
-
+let score;
+let winstreak;
 //musixmatch api key
 const apikey = "251585f21f0dcde77139880f7198a2ea";
 
@@ -28,9 +27,24 @@ const answerSection = document.querySelector("#answerSection");
 const loginButton = document.querySelector("#loginButton");
 const spotifyBlock = document.querySelector("#spotifyBlock");
 
+const scoreVal = document.querySelector("#scoreVal");
+
+const winstreakVal = document.querySelector("#winstreakVal");
+
 let guessAnswer = "";
 
 let randTrack = "null";
+
+if(window.localStorage.getItem("Score") == null){
+    score = 0;
+    winstreak = 0;
+}
+else{
+    score = Number(window.localStorage.getItem("Score"));
+    winstreak = Number(window.localStorage.getItem("Winstreak"));
+    scoreVal.innerHTML = `<h2 class="subtitle">Score: ${score}</h2>`;
+    winstreakVal.innerHTML = `<h2 class="subtitle">Winstreak: ${winstreak}</h2>`;
+}
 
 async function getArtistID(apikey, artist){
     //escape to hard-coded song for testing
@@ -274,7 +288,12 @@ function guessChecker(guess){
         winstreak += 1;
         window.localStorage.setItem("Score", score);
         window.localStorage.setItem("Winstreak", winstreak); 
+        scoreVal.innerHTML = `<h2 class="subtitle">Score: ${score}</h2>`;
+        winstreakVal.innerHTML = `<h2 class="subtitle">Winstreak: ${winstreak}</h2>`;
     }else{
+        winstreak = 0;
+        window.localStorage.setItem("Winstreak", winstreak);
+        winstreakVal.innerHTML = `<h2 class="subtitle">Winstreak: ${winstreak}</h2>`;
         console.log("Incorrect.");
         correctness.innerText = "Incorrect!"
         answerBox.innerHTML = `
@@ -496,6 +515,7 @@ artistInput.addEventListener("keypress", async (e) => {
     if(e.key!="Enter"){
         return;
     }
+    correctness.innerHTML = "";
     let artist = artistInput.value;
     //replace all spaces with underscores
     artist = artist.replace(/ /gi, "_");
