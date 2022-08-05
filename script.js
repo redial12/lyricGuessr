@@ -1,7 +1,6 @@
 //score and winstreak variables
-let score = 0;
-let winstreak = 0; 
-
+let score;
+let winstreak;
 //musixmatch api key
 const apikey = "251585f21f0dcde77139880f7198a2ea";
 
@@ -30,11 +29,15 @@ let guessAnswer = "";
 
 let randTrack;
 
-let scoreSt = window.localStorage.getItem("Score");
-let winstreakSt = window.localStorage.getItem("Winstreak");
-if(scoreSt != null){
-    scoreVal.innerHTML = `<h2 class="subtitle">Score: ${scoreSt}</h2>`;
-    winstreakVal.innerHTML = `<h2 class="subtitle">Winstreak: ${winstreakSt}</h2>`;
+if(window.localStorage.getItem("Score") == null){
+    score = 0;
+    winstreak = 0;
+}
+else{
+    score = Number(window.localStorage.getItem("Score"));
+    winstreak = Number(window.localStorage.getItem("Winstreak"));
+    scoreVal.innerHTML = `<h2 class="subtitle">Score: ${score}</h2>`;
+    winstreakVal.innerHTML = `<h2 class="subtitle">Winstreak: ${winstreak}</h2>`;
 }
 
 async function getArtistID(apikey, artist){
@@ -239,6 +242,7 @@ artistInput.addEventListener("keypress", async (e) => {
     if(e.key!="Enter"){
         return;
     }
+    correctness.innerHTML = "";
     let artist = artistInput.value;
     //replace all spaces with underscores
     artist = artist.replace(/ /gi, "_");
