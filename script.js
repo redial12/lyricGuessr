@@ -2,7 +2,7 @@
 let score;
 let winstreak;
 //musixmatch api key
-const apikey = "251585f21f0dcde77139880f7198a2ea";
+const apikey = "84f4ec2655a2263d350ed92946c2cdeb";
 
 //spotify api stuff
 var client_id = "38df025f2f344c0cb44bac86a7e50fb1";
