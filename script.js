@@ -30,7 +30,7 @@ const spotifyBlock = document.querySelector("#spotifyBlock");
 
 let guessAnswer = "";
 
-let randTrack;
+let randTrack = "null";
 
 async function getArtistID(apikey, artist){
     //escape to hard-coded song for testing
@@ -77,6 +77,9 @@ async function getAlbums(apikey, artistID){
     // console.log(response)
     const data = await response.json();
     console.log(data);
+    if(data.message.body.album_list.length == 0){
+        alert("Artist has no albums on MusixMatch!");
+    }
     data.message.body.album_list.forEach(element => {
         if(!albumNames.has(element.album.album_name)){
             albumNames.add(element.album.album_name);
@@ -89,33 +92,82 @@ async function getAlbums(apikey, artistID){
 }
 
 async function getTrack(apikey, artistAlbums){
-    //pick from one of the albums
     var randomNum = Math.floor(Math.random() * artistAlbums.length);
-    const randAlbumID = artistAlbums[randomNum];
+    var randAlbumID = artistAlbums[randomNum];
     console.log("Random album ID: " + randAlbumID);
     //query to get tracks from random album
     const myQuery = `https://api.musixmatch.com/ws/1.1/album.tracks.get?apikey=${apikey}&album_id=${randAlbumID}`;
     const response = await fetch(myQuery);
     if(!response.ok){
         throw new Error(`Error! status: ${response.status}`);
-     }
+    }
     // console.log(response)
     const data = await response.json();
     console.log(data);
     //get trackList array and pick a random track
     var trackList = data.message.body.track_list;
-    randomNum = Math.floor(Math.random()*trackList.length);
-    randTrack = trackList[randomNum];
+    var randomNumT = Math.floor(Math.random()*trackList.length);
+    randTrack = trackList[randomNumT];
     var counter = trackList.length;
     console.log(randTrack);
-    while(randTrack.track.has_lyrics == 0 && counter != 0){
-        trackList.splice(randomNum, 1);
-        randTrack = trackList[randomNum];
+    Loop1:
+    while(randTrack.track.has_lyrics == 0){
+        trackList.splice(randomNumT, 1);
+        randomNumT = Math.floor(Math.random()*trackList.length);
+        randTrack = trackList[randomNumT];
         counter--;
         console.log(randTrack);
+        console.log(trackList);
+        if(typeof randTrack == "undefined"){
+            console.log("No song with lyrics in this album!");
+            //return artistAlbums without current album?
+            // randTrack == "null";
+            break Loop1;
+        }
     }
-    if(counter == 0){
-        throw new Error(`No songs with lyrics in Album!`);
+    console.log("broke through Loop1 only");
+    console.log(randTrack);
+    Loop2:
+    while(typeof randTrack == "undefined"){
+        //pick from one of the albums
+        artistAlbums.splice(randomNum, 1);
+        if(artistAlbums.length == 0){
+            alert("No albums with lyrics!");
+            console.log("No albums with lyrics!");
+            break Loop2;
+        }
+        var randomNum = Math.floor(Math.random() * artistAlbums.length);
+        var randAlbumID = artistAlbums[randomNum];
+        console.log("Random album ID: " + randAlbumID);
+        //query to get tracks from random album
+        const myQuery = `https://api.musixmatch.com/ws/1.1/album.tracks.get?apikey=${apikey}&album_id=${randAlbumID}`;
+        const response = await fetch(myQuery);
+        if(!response.ok){
+            throw new Error(`Error! status: ${response.status}`);
+        }
+        // console.log(response)
+        const data = await response.json();
+        console.log(data);
+        //get trackList array and pick a random track
+        var trackList = data.message.body.track_list;
+        var randomNumT = Math.floor(Math.random()*trackList.length);
+        randTrack = trackList[randomNumT];
+        var counter = trackList.length;
+        console.log(randTrack);
+        Loop3:
+        while(randTrack.track.has_lyrics == 0){
+            trackList.splice(randomNumT, 1);
+            randomNumT = Math.floor(Math.random()*trackList.length);
+            randTrack = trackList[randomNumT];
+            counter--;
+            console.log(randTrack);
+            if(typeof randTrack == "undefined"){
+                console.log("No song with lyrics in this album!");
+                //return artistAlbums without current album?
+                // randTrack == "null";
+                break Loop3;
+            }
+        }
     }
     guessAnswer = randTrack.track.track_name;
     return randTrack;
@@ -324,7 +376,7 @@ async function refreshTokenFunction(refToken){
 }
 
 async function getTopArtists(token){
-    const myQuery = `https://api.spotify.com/v1/me/top/artists`;
+    const myQuery = `https://api.spotify.com/v1/me/top/artists?time_range=long_term`;
     let result;
     await fetch(myQuery, {
         headers: {
