@@ -7,7 +7,8 @@ const apikey = "84f4ec2655a2263d350ed92946c2cdeb";
 //spotify api stuff
 var client_id = "38df025f2f344c0cb44bac86a7e50fb1";
 var client_secret = "b552b65ef19747a5ba46b6ba887d79a7";
-var redirect_uri = "http://127.0.0.1:5501/";
+var redirect_uri = "https://soft-lamington-2e416e.netlify.app/";
+console.log(window.location.href);
 
 var currentToken ="";
 var refreshToken = "";
@@ -52,16 +53,15 @@ async function getArtistID(apikey, artist){
         return -1;
     }
     //query for artist search (temporary solution using proxy)
-    const myQuery = `https://api.musixmatch.com/ws/1.1/artist.search?apikey=${apikey}&q_artist=${artist}
+    const myQuery = `https://effulgent-sawine-ae4ee1.netlify.app/.netlify/functions/cors/https://api.musixmatch.com/ws/1.1/artist.search?apikey=${apikey}&q_artist=${artist}
     `;
     const response = await fetch(myQuery, {
-        mode: 'cors',
-        header: {'Access-Control-Allow-Origin': "http://127.0.0.1:5500",
-        'Access-Control-Allow-Headers' : "Origin, X-Requested With, Content-Type, Accept"},
+        mode: 'cors'
     });
     answerBox.innerHTML = "";
     //to start using hard-coded data (note for jean, what does this do?)
     if(!response.ok){
+        console.log(response);
         return -1;
     }
     // console.log(response);
@@ -82,7 +82,7 @@ async function getAlbums(apikey, artistID){
     let arrAlbums = [];
     const albumNames = new Set();
     //query to get albums using artist IDs
-    const myQuery = `https://api.musixmatch.com/ws/1.1/artist.albums.get?apikey=${apikey}&artist_id=${artistID}&page_size=10`;
+    const myQuery = `https://effulgent-sawine-ae4ee1.netlify.app/.netlify/functions/cors/https://api.musixmatch.com/ws/1.1/artist.albums.get?apikey=${apikey}&artist_id=${artistID}&page_size=10`;
     console.log(myQuery);
     const response = await fetch(myQuery);
     if(!response.ok){
@@ -110,7 +110,7 @@ async function getTrack(apikey, artistAlbums){
     var randAlbumID = artistAlbums[randomNum];
     console.log("Random album ID: " + randAlbumID);
     //query to get tracks from random album
-    const myQuery = `https://api.musixmatch.com/ws/1.1/album.tracks.get?apikey=${apikey}&album_id=${randAlbumID}`;
+    const myQuery = `https://effulgent-sawine-ae4ee1.netlify.app/.netlify/functions/cors/https://api.musixmatch.com/ws/1.1/album.tracks.get?apikey=${apikey}&album_id=${randAlbumID}`;
     const response = await fetch(myQuery);
     if(!response.ok){
         throw new Error(`Error! status: ${response.status}`);
@@ -154,7 +154,7 @@ async function getTrack(apikey, artistAlbums){
         var randAlbumID = artistAlbums[randomNum];
         console.log("Random album ID: " + randAlbumID);
         //query to get tracks from random album
-        const myQuery = `https://api.musixmatch.com/ws/1.1/album.tracks.get?apikey=${apikey}&album_id=${randAlbumID}`;
+        const myQuery = `https://effulgent-sawine-ae4ee1.netlify.app/.netlify/functions/cors/https://api.musixmatch.com/ws/1.1/album.tracks.get?apikey=${apikey}&album_id=${randAlbumID}`;
         const response = await fetch(myQuery);
         if(!response.ok){
             throw new Error(`Error! status: ${response.status}`);
@@ -190,7 +190,7 @@ async function getTrack(apikey, artistAlbums){
 async function getLyrics(apikey, artistTrack){
     let trackID = artistTrack.track.track_id;
     console.log(trackID);
-    const myQuery = `https://api.musixmatch.com/ws/1.1/track.lyrics.get?apikey=${apikey}&track_id=${trackID}`;
+    const myQuery = `https://effulgent-sawine-ae4ee1.netlify.app/.netlify/functions/cors/https://api.musixmatch.com/ws/1.1/track.lyrics.get?apikey=${apikey}&track_id=${trackID}`;
     const response = await fetch(myQuery);
     if(!response.ok){
         throw new Error(`Error! status: ${response.status}`);
@@ -346,15 +346,17 @@ async function getAuth(){
     var response_type =  "code";
     var scope = "user-top-read playlist-read-private user-library-read"
     var state = generateRandomString(16);
-    var myQuery = `https://accounts.spotify.com/authorize?client_id=${client_id}&scope=${scope}&redirect_uri=${redirect_uri}&state=${state}&response_type=${response_type}&show_dialog=true`;
+    var myQuery = `https://effulgent-sawine-ae4ee1.netlify.app/.netlify/functions/cors/https://accounts.spotify.com/authorize?client_id=${client_id}&scope=${scope}&redirect_uri=${redirect_uri}&state=${state}&response_type=${response_type}&show_dialog=true`;
     const response = await fetch(myQuery);
     if(!response.ok){
         throw new Error(`Error! status: ${response.status}`);
     }
     console.log(response);
     console.log(response.url);
+    var url_split = response.url.split(".netlify/functions/cors/")[1];
+    console.log(url_split);
     document.cookie = `storedState=${state}`;
-    window.location.href = response.url;
+    window.location.href = url_split;
 }
 
 async function getToken(code){
@@ -402,6 +404,7 @@ async function refreshTokenFunction(refToken){
 }
 
 async function getTopArtists(token){
+    console.log("token in param: " + token);
     const myQuery = `https://api.spotify.com/v1/me/top/artists?time_range=long_term`;
     let result;
     await fetch(myQuery, {
