@@ -2,11 +2,11 @@
 let score;
 let winstreak;
 //musixmatch api key
-const apikey = "84f4ec2655a2263d350ed92946c2cdeb";
+const apikey = "";
 
 //spotify api stuff
-var client_id = "38df025f2f344c0cb44bac86a7e50fb1";
-var client_secret = "b552b65ef19747a5ba46b6ba887d79a7";
+var client_id = "";
+var client_secret = "";
 var redirect_uri = "https://lyricguessr.netlify.app/";
 console.log(window.location.href);
 
